@@ -160,6 +160,13 @@ int main(int argc, char **argv){
 	//geometry_msgs::PoseArray pt_array;
 	//pt_array.header.seq = 0;
 	//pub_pts_and_pose.publish(pt_array);
+	
+	char IsSaveMap;
+    cout << "Do you want to save the map?(y/n)" << endl;  
+	cin >> IsSaveMap;  
+    if(IsSaveMap == 'Y' || IsSaveMap == 'y')  
+        SLAM.SaveMap("results/MapPointandKeyFrame.bin");
+	
 	ros::shutdown();
 	return 0;
 }
