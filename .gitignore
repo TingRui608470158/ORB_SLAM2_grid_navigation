@@ -27,3 +27,9 @@ CameraTrajectory.txt
 /runspace/bags/
 /runspace/other/
 /runspace/results/
+Examples/ROS/ORB_SLAM2/Monopub
+Examples/ROS/ORB_SLAM2/Monosub
+Examples/ROS/ORB_SLAM2/RGBDpub
+Examples/ROS/ORB_SLAM2/VRobot
+Examples/ROS/ORB_SLAM2/savepcl
+
