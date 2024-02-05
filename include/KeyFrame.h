@@ -119,6 +119,9 @@ public:
         return pKF1->mnId<pKF2->mnId;
     }
 
+    void updateID(long unsigned int i);
+
+
 
     // The following variables are accesed from only 1 thread or never change (no mutex needed).
 public:

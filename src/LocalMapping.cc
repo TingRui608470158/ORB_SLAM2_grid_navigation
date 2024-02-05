@@ -79,9 +79,11 @@ void LocalMapping::Run()
                 // Local BA
                 if(mpMap->KeyFramesInMap()>2)
                     Optimizer::LocalBundleAdjustment(mpCurrentKeyFrame,&mbAbortBA, mpMap);
-
+cout<<"LocalMapping::Run() KeyFrameCulling"<<endl;
                 // Check redundant local Keyframes
                 KeyFrameCulling();
+cout<<"LocalMapping::Run() KeyFrameCulling end"<<endl;
+
             }
 
             mpLoopCloser->InsertKeyFrame(mpCurrentKeyFrame);
@@ -636,13 +638,15 @@ void LocalMapping::KeyFrameCulling()
     // in at least other 3 keyframes (in the same or finer scale)
     // We only consider close stereo points
     vector<KeyFrame*> vpLocalKeyFrames = mpCurrentKeyFrame->GetVectorCovisibleKeyFrames();
-
+cout<<"LocalMapping::KeyFrameCulling() 0"<<endl;
     for(vector<KeyFrame*>::iterator vit=vpLocalKeyFrames.begin(), vend=vpLocalKeyFrames.end(); vit!=vend; vit++)
     {
         KeyFrame* pKF = *vit;
         if(pKF->mnId==0)
             continue;
+        pKF->UpdateConnections();
         const vector<MapPoint*> vpMapPoints = pKF->GetMapPointMatches();
+cout<<"LocalMapping::KeyFrameCulling() 01"<<endl;
 
         int nObs = 3;
         const int thObs=nObs;
@@ -689,9 +693,14 @@ void LocalMapping::KeyFrameCulling()
                 }
             }
         }  
+cout<<"LocalMapping::KeyFrameCulling() 02"<<endl;
 
         if(nRedundantObservations>0.9*nMPs)
+        {
             pKF->SetBadFlag();
+        }
+cout<<"LocalMapping::KeyFrameCulling() 03   "<<endl;
+
     }
 }
 

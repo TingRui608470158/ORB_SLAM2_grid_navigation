@@ -152,7 +152,11 @@ cv::Mat KeyFrame::GetTranslation()
 void KeyFrame::AddConnection(KeyFrame *pKF, const int &weight)
 {
     {
+            cout<<"KeyFrame::AddConnection 0 "<<endl;
+
         unique_lock<mutex> lock(mMutexConnections);
+    cout<<"KeyFrame::AddConnection 1 "<<endl;
+
         if(!mConnectedKeyFrameWeights.count(pKF))
             mConnectedKeyFrameWeights[pKF]=weight;
         else if(mConnectedKeyFrameWeights[pKF]!=weight)
@@ -166,7 +170,11 @@ void KeyFrame::AddConnection(KeyFrame *pKF, const int &weight)
 
 void KeyFrame::UpdateBestCovisibles()
 {
+    cout<<"KeyFrame::UpdateBestCovisibles 0 "<<endl;
+
     unique_lock<mutex> lock(mMutexConnections);
+        cout<<"KeyFrame::UpdateBestCovisibles 1 "<<endl;
+
     vector<pair<int,KeyFrame*> > vPairs;
     vPairs.reserve(mConnectedKeyFrameWeights.size());
     for(map<KeyFrame*,int>::iterator mit=mConnectedKeyFrameWeights.begin(), mend=mConnectedKeyFrameWeights.end(); mit!=mend; mit++)
@@ -187,7 +195,9 @@ void KeyFrame::UpdateBestCovisibles()
 
 set<KeyFrame*> KeyFrame::GetConnectedKeyFrames()
 {
+    cout<<"KeyFrame::GetConnectedKeyFrames 0 "<<endl;
     unique_lock<mutex> lock(mMutexConnections);
+    cout<<"KeyFrame::GetConnectedKeyFrames 1 "<<endl;
     set<KeyFrame*> s;
     for(map<KeyFrame*,int>::iterator mit=mConnectedKeyFrameWeights.begin();mit!=mConnectedKeyFrameWeights.end();mit++)
         s.insert(mit->first);
@@ -196,13 +206,21 @@ set<KeyFrame*> KeyFrame::GetConnectedKeyFrames()
 
 vector<KeyFrame*> KeyFrame::GetVectorCovisibleKeyFrames()
 {
+        cout<<"KeyFrame::GetVectorCovisibleKeyFrames 0 "<<endl;
+
     unique_lock<mutex> lock(mMutexConnections);
+    cout<<"KeyFrame::GetVectorCovisibleKeyFrames 1 "<<endl;
+
     return mvpOrderedConnectedKeyFrames;
 }
 
 vector<KeyFrame*> KeyFrame::GetBestCovisibilityKeyFrames(const int &N)
 {
+                        cout<<"KeyFrame::GetBestCovisibilityKeyFrames 0 "<<endl;
+
     unique_lock<mutex> lock(mMutexConnections);
+                    cout<<"KeyFrame::GetBestCovisibilityKeyFrames 1 "<<endl;
+
     if((int)mvpOrderedConnectedKeyFrames.size()<N)
         return mvpOrderedConnectedKeyFrames;
     else
@@ -212,7 +230,10 @@ vector<KeyFrame*> KeyFrame::GetBestCovisibilityKeyFrames(const int &N)
 
 vector<KeyFrame*> KeyFrame::GetCovisiblesByWeight(const int &w)
 {
+                    cout<<"KeyFrame::GetCovisiblesByWeight 0 "<<endl;
+
     unique_lock<mutex> lock(mMutexConnections);
+                cout<<"KeyFrame::GetCovisiblesByWeight 1 "<<endl;
 
     if(mvpOrderedConnectedKeyFrames.empty())
         return vector<KeyFrame*>();
@@ -229,7 +250,11 @@ vector<KeyFrame*> KeyFrame::GetCovisiblesByWeight(const int &w)
 
 int KeyFrame::GetWeight(KeyFrame *pKF)
 {
+cout<<"KeyFrame::GetWeight 0 "<<endl;
+   
     unique_lock<mutex> lock(mMutexConnections);
+cout<<"KeyFrame::GetWeight 1 "<<endl;
+
     if(mConnectedKeyFrameWeights.count(pKF))
         return mConnectedKeyFrameWeights[pKF];
     else
@@ -311,7 +336,10 @@ vector<MapPoint*> KeyFrame::GetMapPointMatches()
 
 MapPoint* KeyFrame::GetMapPoint(const size_t &idx)
 {
+// cout<<"KeyFrame::GetMapPoint 0 "<<endl;
     unique_lock<mutex> lock(mMutexFeatures);
+// cout<<"KeyFrame::GetMapPoint 1 "<<endl;
+
     return mvpMapPoints[idx];
 }
 
@@ -390,7 +418,10 @@ void KeyFrame::UpdateConnections()
     }
 
     {
+            cout<<"KeyFrame::UpdateConnections 0 "<<endl;
+
         unique_lock<mutex> lockCon(mMutexConnections);
+    cout<<"KeyFrame::UpdateConnections 1 "<<endl;
 
         // mspConnectedKeyFrames = spConnectedKeyFrames;
         mConnectedKeyFrameWeights = KFcounter;
@@ -409,19 +440,31 @@ void KeyFrame::UpdateConnections()
 
 void KeyFrame::AddChild(KeyFrame *pKF)
 {
+    cout<<"KeyFrame::AddChild 0 "<<endl;
+
     unique_lock<mutex> lockCon(mMutexConnections);
+    cout<<"KeyFrame::AddChild 1 "<<endl;
+
     mspChildrens.insert(pKF);
 }
 
 void KeyFrame::EraseChild(KeyFrame *pKF)
 {
+    cout<<"KeyFrame::EraseChild 0 "<<endl;
+
     unique_lock<mutex> lockCon(mMutexConnections);
+        cout<<"KeyFrame::EraseChild 1 "<<endl;
+
     mspChildrens.erase(pKF);
 }
 
 void KeyFrame::ChangeParent(KeyFrame *pKF)
 {
+    cout<<"KeyFrame::ChangeParent 0 "<<endl;
+
     unique_lock<mutex> lockCon(mMutexConnections);
+    cout<<"KeyFrame::ChangeParent 1 "<<endl;
+
     mpParent = pKF;
     pKF->AddChild(this);
 }
@@ -440,13 +483,19 @@ KeyFrame* KeyFrame::GetParent()
 
 bool KeyFrame::hasChild(KeyFrame *pKF)
 {
+    cout<<"KeyFrame::hasChild 0 "<<endl;
+
     unique_lock<mutex> lockCon(mMutexConnections);
+    cout<<"KeyFrame::hasChild 1 "<<endl;
+
     return mspChildrens.count(pKF);
 }
 
 void KeyFrame::AddLoopEdge(KeyFrame *pKF)
 {
+    cout<<"KeyFrame::AddLoopEdge 0 "<<endl;
     unique_lock<mutex> lockCon(mMutexConnections);
+    cout<<"KeyFrame::AddLoopEdge 1 "<<endl;
     mbNotErase = true;
     mspLoopEdges.insert(pKF);
 }
@@ -466,7 +515,11 @@ void KeyFrame::SetNotErase()
 void KeyFrame::SetErase()
 {
     {
+                    cout<<"KeyFrame::SetErase 0 "<<endl;
+
         unique_lock<mutex> lock(mMutexConnections);
+            cout<<"KeyFrame::SetErase 1 "<<endl;
+
         if(mspLoopEdges.empty())
         {
             mbNotErase = false;
@@ -482,7 +535,11 @@ void KeyFrame::SetErase()
 void KeyFrame::SetBadFlag()
 {   
     {
+                    cout<<"KeyFrame::SetBadFlag2 0 "<<endl;
+
         unique_lock<mutex> lock(mMutexConnections);
+            cout<<"KeyFrame::SetBadFlag2 1 "<<endl;
+        cout<<"mbNotErase = "<<mbNotErase <<endl;
         if(mnId==0)
             return;
         else if(mbNotErase)
@@ -493,13 +550,19 @@ void KeyFrame::SetBadFlag()
     }
 
     for(map<KeyFrame*,int>::iterator mit = mConnectedKeyFrameWeights.begin(), mend=mConnectedKeyFrameWeights.end(); mit!=mend; mit++)
-        mit->first->EraseConnection(this);
+    {
 
+        mit->first->EraseConnection(this);
+    }
     for(size_t i=0; i<mvpMapPoints.size(); i++)
         if(mvpMapPoints[i])
             mvpMapPoints[i]->EraseObservation(this);
     {
+            cout<<"KeyFrame::SetBadFlag2 0 "<<endl;
+
         unique_lock<mutex> lock(mMutexConnections);
+            cout<<"KeyFrame::SetBadFlag2 1 "<<endl;
+
         unique_lock<mutex> lock1(mMutexFeatures);
 
         mConnectedKeyFrameWeights.clear();
@@ -582,24 +645,51 @@ void KeyFrame::SetBadFlag()
 
 bool KeyFrame::isBad()
 {
+    cout<<"KeyFrame::isBad 0 "<<endl;
+
     unique_lock<mutex> lock(mMutexConnections);
+cout<<"KeyFrame::isBad 1 "<<endl;
+
     return mbBad;
 }
 
 void KeyFrame::EraseConnection(KeyFrame* pKF)
 {
+    cout<<"KeyFrame::EraseConnection -1"<<endl;
+
     bool bUpdate = false;
+    
     {
+cout<<"KeyFrame::EraseConnection 0 "<<endl;
+cout<<"mConnectedKeyFrameWeights.size = "<<mConnectedKeyFrameWeights.size()<<endl;
+ for (const auto& pair : mConnectedKeyFrameWeights) {
+        std::cout << "Key: " << pair.first << ", Weight: " << pair.second << std::endl;
+    }
+    cout<<"KeyFrame::EraseConnection 01 "<<endl;
+
+        if(pKF == nullptr)
+        {
+            cout<<"empty";
+        }else
+        {
+            cout<<"exist";
+        }
         unique_lock<mutex> lock(mMutexConnections);
+cout<<"KeyFrame::EraseConnection 01 "<<endl;
+
         if(mConnectedKeyFrameWeights.count(pKF))
         {
+cout<<"KeyFrame::EraseConnection 02 "<<endl;
+
             mConnectedKeyFrameWeights.erase(pKF);
             bUpdate=true;
         }
+cout<<"KeyFrame::EraseConnection 03 "<<endl;
+
     }
 
-    if(bUpdate)
-        UpdateBestCovisibles();
+    // if(bUpdate)
+    //     UpdateBestCovisibles();
 }
 
 vector<size_t> KeyFrame::GetFeaturesInArea(const float &x, const float &y, const float &r) const
@@ -696,6 +786,12 @@ float KeyFrame::ComputeSceneMedianDepth(const int q)
     sort(vDepths.begin(),vDepths.end());
 
     return vDepths[(vDepths.size()-1)/q];
+}
+
+void KeyFrame::updateID(long unsigned int i)
+{
+    mnId=i+1;
+    nNextId = i+2;   //为了保险,我这边直接设置其下一个id是最大id+2
 }
 
 } //namespace ORB_SLAM

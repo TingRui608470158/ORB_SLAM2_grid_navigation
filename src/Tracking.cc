@@ -1036,6 +1036,7 @@ bool Tracking::TrackReferenceKeyFrame()
 
     mCurrentFrame.mvpMapPoints = vpMapPointMatches;
     mCurrentFrame.SetPose(mLastFrame.mTcw);
+cout<<" Tracking::TrackReferenceKeyFrame()"<<endl;
 
     Optimizer::PoseOptimization(&mCurrentFrame);
 
@@ -1173,6 +1174,7 @@ bool Tracking::TrackWithMotionModel()
 
     if(nmatches<20)
         return false;
+cout<<" Tracking::TrackWithMotionModel()"<<endl;
 
     // Optimize frame pose with all matches
     Optimizer::PoseOptimization(&mCurrentFrame);
@@ -1209,16 +1211,20 @@ bool Tracking::TrackWithMotionModel()
 
 bool Tracking::TrackLocalMap()
 {
+cout<<"Tracking::TrackLocalMap() 0" <<endl;
     // We have an estimation of the camera pose and some map points tracked in the frame.
     // We retrieve the local map and try to find matches to points in the local map.
 
     UpdateLocalMap();
+cout<<"Tracking::TrackLocalMap() 1" <<endl;
 
     SearchLocalPoints();
 
     // Optimize Pose
+cout<<" Tracking::TrackLocalMap() 2"<<endl;
     Optimizer::PoseOptimization(&mCurrentFrame);
     mnMatchesInliers = 0;
+cout<<"Tracking::TrackLocalMap() 3" <<endl;
 
     // Update MapPoints Statistics
     for(int i=0; i<mCurrentFrame.N; i++)
@@ -1241,6 +1247,7 @@ bool Tracking::TrackLocalMap()
 
         }
     }
+cout<<"Tracking::TrackLocalMap() 4" <<endl;
 
     // Decide if the tracking was succesful
     // More restrictive if there was a relocalization recently
@@ -1716,6 +1723,7 @@ bool Tracking::Relocalization()
                     else
                         mCurrentFrame.mvpMapPoints[j]=NULL;
                 }
+cout<<" Tracking::Relocalization()"<<endl;
 
                 int nGood = Optimizer::PoseOptimization(&mCurrentFrame);
 
@@ -1733,6 +1741,8 @@ bool Tracking::Relocalization()
 
                     if(nadditional+nGood>=50)
                     {
+cout<<" Tracking::Relocalization()2"<<endl;
+
                         nGood = Optimizer::PoseOptimization(&mCurrentFrame);
 
                         // If many inliers but still not enough, search by projection again in a narrower window
@@ -1748,6 +1758,8 @@ bool Tracking::Relocalization()
                             // Final optimization
                             if(nGood+nadditional>=50)
                             {
+cout<<" Tracking::Relocalization() 3"<<endl;
+
                                 nGood = Optimizer::PoseOptimization(&mCurrentFrame);
 
                                 for(int io =0; io<mCurrentFrame.N; io++)

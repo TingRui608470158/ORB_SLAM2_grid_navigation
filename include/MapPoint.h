@@ -41,6 +41,8 @@ class MapPoint
 public:
     MapPoint(const cv::Mat &Pos, KeyFrame* pRefKF, Map* pMap);
     MapPoint(const cv::Mat &Pos, Map* pMap, Frame* pFrame, const int &idxF);
+    MapPoint(long unsigned int i, Map* pMap);
+
 
     MapPoint(const cv::Mat &Pos, Map* pMap);// When loading map, we redefine MapPoint
 

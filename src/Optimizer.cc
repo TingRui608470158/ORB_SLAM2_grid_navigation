@@ -49,6 +49,7 @@ void Optimizer::GlobalBundleAdjustemnt(Map* pMap, int nIterations, bool* pbStopF
 void Optimizer::BundleAdjustment(const vector<KeyFrame *> &vpKFs, const vector<MapPoint *> &vpMP,
                                  int nIterations, bool* pbStopFlag, const unsigned long nLoopKF, const bool bRobust)
 {
+cout<<"Optimizer::Bundle_Adjustment 0 "<<endl;
     vector<bool> vbNotIncludedMP;
     vbNotIncludedMP.resize(vpMP.size());
 
@@ -64,6 +65,7 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame *> &vpKFs, const vector<M
 
     if(pbStopFlag)
         optimizer.setForceStopFlag(pbStopFlag);
+cout<<"Optimizer::Bundle_Adjustment 01 "<<endl;
 
     long unsigned int maxKFid = 0;
 
@@ -77,10 +79,12 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame *> &vpKFs, const vector<M
         vSE3->setEstimate(Converter::toSE3Quat(pKF->GetPose()));
         vSE3->setId(pKF->mnId);
         vSE3->setFixed(pKF->mnId==0);
+        cout<<"Optimizer::Bundle_Adjustment add_Vertex"<<endl;
         optimizer.addVertex(vSE3);
         if(pKF->mnId>maxKFid)
             maxKFid=pKF->mnId;
     }
+cout<<"Optimizer::Bundle_Adjustment 02 "<<endl;
 
     const float thHuber2D = sqrt(5.99);
     const float thHuber3D = sqrt(7.815);
@@ -96,20 +100,25 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame *> &vpKFs, const vector<M
         const int id = pMP->mnId+maxKFid+1;
         vPoint->setId(id);
         vPoint->setMarginalized(true);
+cout<<"Optimizer::Bundle_Adjustment add_Vertex2"<<endl;
         optimizer.addVertex(vPoint);
+cout<<"Optimizer::Bundle_Adjustment add_Vertex2 end"<<endl;
 
        const map<KeyFrame*,size_t> observations = pMP->GetObservations();
+cout<<"Optimizer::Bundle_Adjustment 021 "<<endl;
 
         int nEdges = 0;
         //SET EDGES
         for(map<KeyFrame*,size_t>::const_iterator mit=observations.begin(); mit!=observations.end(); mit++)
         {
+cout<<"Optimizer::Bundle_Adjustment 0211 "<<endl;
 
             KeyFrame* pKF = mit->first;
             if(pKF->isBad() || pKF->mnId>maxKFid)
                 continue;
 
             nEdges++;
+cout<<"Optimizer::Bundle_Adjustment 0212 "<<endl;
 
             const cv::KeyPoint &kpUn = pKF->mvKeysUn[mit->second];
 
@@ -117,6 +126,7 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame *> &vpKFs, const vector<M
             {
                 Eigen::Matrix<double,2,1> obs;
                 obs << kpUn.pt.x, kpUn.pt.y;
+cout<<"Optimizer::Bundle_Adjustment 0213 "<<endl;
 
                 g2o::EdgeSE3ProjectXYZ* e = new g2o::EdgeSE3ProjectXYZ();
 
@@ -125,6 +135,7 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame *> &vpKFs, const vector<M
                 e->setMeasurement(obs);
                 const float &invSigma2 = pKF->mvInvLevelSigma2[kpUn.octave];
                 e->setInformation(Eigen::Matrix2d::Identity()*invSigma2);
+cout<<"Optimizer::Bundle_Adjustment 0214 "<<endl;
 
                 if(bRobust)
                 {
@@ -132,6 +143,7 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame *> &vpKFs, const vector<M
                     e->setRobustKernel(rk);
                     rk->setDelta(thHuber2D);
                 }
+cout<<"Optimizer::Bundle_Adjustment 0215 "<<endl;
 
                 e->fx = pKF->fx;
                 e->fy = pKF->fy;
@@ -139,6 +151,8 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame *> &vpKFs, const vector<M
                 e->cy = pKF->cy;
 
                 optimizer.addEdge(e);
+cout<<"Optimizer::Bundle_Adjustment 0216 "<<endl;
+
             }
             else
             {
@@ -171,6 +185,7 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame *> &vpKFs, const vector<M
                 optimizer.addEdge(e);
             }
         }
+cout<<"Optimizer::Bundle_Adjustment 022 "<<endl;
 
         if(nEdges==0)
         {
@@ -182,6 +197,7 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame *> &vpKFs, const vector<M
             vbNotIncludedMP[i]=false;
         }
     }
+cout<<"Optimizer::Bundle_Adjustment 03 "<<endl;
 
     // Optimize!
     optimizer.initializeOptimization();
@@ -208,6 +224,7 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame *> &vpKFs, const vector<M
             pKF->mnBAGlobalForKF = nLoopKF;
         }
     }
+cout<<"Optimizer::Bundle_Adjustment 04 "<<endl;
 
     //Points
     for(size_t i=0; i<vpMP.size(); i++)
@@ -233,20 +250,26 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame *> &vpKFs, const vector<M
             pMP->mnBAGlobalForKF = nLoopKF;
         }
     }
+cout<<"Optimizer::Bundle_Adjustment 05 "<<endl;
 
 }
 
 int Optimizer::PoseOptimization(Frame *pFrame)
 {
+cout<<"Optimizer::PoseOptimization 1"<<endl;
+
     g2o::SparseOptimizer optimizer;
     g2o::BlockSolver_6_3::LinearSolverType * linearSolver;
 
     linearSolver = new g2o::LinearSolverDense<g2o::BlockSolver_6_3::PoseMatrixType>();
+cout<<"Optimizer::PoseOptimization 2"<<endl;
 
     g2o::BlockSolver_6_3 * solver_ptr = new g2o::BlockSolver_6_3(linearSolver);
+cout<<"Optimizer::PoseOptimization 3"<<endl;
 
     g2o::OptimizationAlgorithmLevenberg* solver = new g2o::OptimizationAlgorithmLevenberg(solver_ptr);
     optimizer.setAlgorithm(solver);
+cout<<"Optimizer::PoseOptimization 4"<<endl;
 
     int nInitialCorrespondences=0;
 
@@ -255,7 +278,9 @@ int Optimizer::PoseOptimization(Frame *pFrame)
     vSE3->setEstimate(Converter::toSE3Quat(pFrame->mTcw));
     vSE3->setId(0);
     vSE3->setFixed(false);
+    cout<<"Optimizer::PoseOptimization add_Vertex"<<endl;
     optimizer.addVertex(vSE3);
+cout<<"Optimizer::PoseOptimization 5"<<endl;
 
     // Set MapPoint vertices
     const int N = pFrame->N;
@@ -272,6 +297,7 @@ int Optimizer::PoseOptimization(Frame *pFrame)
 
     const float deltaMono = sqrt(5.991);
     const float deltaStereo = sqrt(7.815);
+cout<<"Optimizer::PoseOptimization 6"<<endl;
 
 
     {
@@ -359,6 +385,7 @@ int Optimizer::PoseOptimization(Frame *pFrame)
 
     }
     }
+cout<<"Optimizer::PoseOptimization 7"<<endl;
 
 
     if(nInitialCorrespondences<3)
@@ -407,6 +434,7 @@ int Optimizer::PoseOptimization(Frame *pFrame)
             if(it==2)
                 e->setRobustKernel(0);
         }
+cout<<"Optimizer::PoseOptimization 8"<<endl;
 
         for(size_t i=0, iend=vpEdgesStereo.size(); i<iend; i++)
         {
@@ -436,6 +464,7 @@ int Optimizer::PoseOptimization(Frame *pFrame)
             if(it==2)
                 e->setRobustKernel(0);
         }
+cout<<"Optimizer::PoseOptimization 9"<<endl;
 
         if(optimizer.edges().size()<10)
             break;
@@ -446,6 +475,7 @@ int Optimizer::PoseOptimization(Frame *pFrame)
     g2o::SE3Quat SE3quat_recov = vSE3_recov->estimate();
     cv::Mat pose = Converter::toCvMat(SE3quat_recov);
     pFrame->SetPose(pose);
+cout<<"Optimizer::PoseOptimization 10"<<endl;
 
     return nInitialCorrespondences-nBad;
 }
@@ -527,6 +557,7 @@ void Optimizer::LocalBundleAdjustment(KeyFrame *pKF, bool* pbStopFlag, Map* pMap
         vSE3->setEstimate(Converter::toSE3Quat(pKFi->GetPose()));
         vSE3->setId(pKFi->mnId);
         vSE3->setFixed(pKFi->mnId==0);
+        cout<<"Optimizer::LocalBundleAdjustment add_Vertex"<<endl;
         optimizer.addVertex(vSE3);
         if(pKFi->mnId>maxKFid)
             maxKFid=pKFi->mnId;
@@ -540,6 +571,7 @@ void Optimizer::LocalBundleAdjustment(KeyFrame *pKF, bool* pbStopFlag, Map* pMap
         vSE3->setEstimate(Converter::toSE3Quat(pKFi->GetPose()));
         vSE3->setId(pKFi->mnId);
         vSE3->setFixed(true);
+        cout<<"Optimizer::LocalBundleAdjustment2 add_Vertex"<<endl;
         optimizer.addVertex(vSE3);
         if(pKFi->mnId>maxKFid)
             maxKFid=pKFi->mnId;
@@ -577,7 +609,9 @@ void Optimizer::LocalBundleAdjustment(KeyFrame *pKF, bool* pbStopFlag, Map* pMap
         int id = pMP->mnId+maxKFid+1;
         vPoint->setId(id);
         vPoint->setMarginalized(true);
+        cout<<"Optimizer::LocalBundleAdjustment3 add_Vertex"<<endl;
         optimizer.addVertex(vPoint);
+        cout<<"Optimizer::LocalBundleAdjustment3 add_Vertex end"<<endl;
 
         const map<KeyFrame*,size_t> observations = pMP->GetObservations();
 
@@ -783,6 +817,7 @@ void Optimizer::OptimizeEssentialGraph(Map* pMap, KeyFrame* pLoopKF, KeyFrame* p
                                        const LoopClosing::KeyFrameAndPose &CorrectedSim3,
                                        const map<KeyFrame *, set<KeyFrame *> > &LoopConnections, const bool &bFixScale)
 {
+    cout<<"Optimizer::OptimizeEssentialGraph"<<endl;
     // Setup optimizer
     g2o::SparseOptimizer optimizer;
     optimizer.setVerbose(false);
@@ -837,7 +872,7 @@ void Optimizer::OptimizeEssentialGraph(Map* pMap, KeyFrame* pLoopKF, KeyFrame* p
         VSim3->setId(nIDi);
         VSim3->setMarginalized(false);
         VSim3->_fix_scale = bFixScale;
-
+        cout<<"Optimizer::OptimizeEssentialGraph add_Vertex"<<endl;
         optimizer.addVertex(VSim3);
 
         vpVertices[nIDi]=VSim3;
@@ -1079,6 +1114,7 @@ int Optimizer::OptimizeSim3(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint *> &
     vSim3->_principle_point2[1] = K2.at<float>(1,2);
     vSim3->_focal_length2[0] = K2.at<float>(0,0);
     vSim3->_focal_length2[1] = K2.at<float>(1,1);
+    cout<<"Optimizer::OptimizeSim3 add_Vertex"<<endl;
     optimizer.addVertex(vSim3);
 
     // Set MapPoint vertices
@@ -1119,6 +1155,7 @@ int Optimizer::OptimizeSim3(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint *> &
                 vPoint1->setEstimate(Converter::toVector3d(P3D1c));
                 vPoint1->setId(id1);
                 vPoint1->setFixed(true);
+                cout<<"Optimizer::OptimizeSim32 add_Vertex"<<endl;
                 optimizer.addVertex(vPoint1);
 
                 g2o::VertexSBAPointXYZ* vPoint2 = new g2o::VertexSBAPointXYZ();
@@ -1127,6 +1164,7 @@ int Optimizer::OptimizeSim3(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint *> &
                 vPoint2->setEstimate(Converter::toVector3d(P3D2c));
                 vPoint2->setId(id2);
                 vPoint2->setFixed(true);
+                cout<<"Optimizer::OptimizeSim33 add_Vertex"<<endl;
                 optimizer.addVertex(vPoint2);
             }
             else
