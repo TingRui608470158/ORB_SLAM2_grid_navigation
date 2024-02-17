@@ -128,7 +128,8 @@ namespace ORB_SLAM2
 	    // Choose to use pure localization mode
 	    char IsPureLocalization;
 	    cout << "Do you want to run pure localization?(y/n)" << endl;
-	    cin >> IsPureLocalization;
+// cin >> IsPureLocalization;
+IsPureLocalization = 'n'; 
 	    if(IsPureLocalization == 'Y' || IsPureLocalization == 'y'){  
 	        ActivateLocalizationMode();
 	    }
@@ -147,7 +148,8 @@ namespace ORB_SLAM2
 	    cout << "Your map file path would be : " << strPathMap << endl; 
 
 	    cout << "Do you want to load the map?(y/n)" << endl;  
-	    cin >> IsLoadMap;
+// cin >> IsLoadMap;
+IsLoadMap = 'y';
 	    SystemSetting *mySystemSetting = new SystemSetting(mpVocabulary);  
 	    mySystemSetting->LoadSystemSetting(strPathSystemSetting);
 	    // mySystemSetting->LoadSystemSetting("/home/boom/MY_ORB_SLAM2/ORB_SLAM2/Examples/Stereo/KITTI04-12.yaml");

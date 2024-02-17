@@ -689,7 +689,14 @@ void LocalMapping::KeyFrameCulling()
                 }
             }
         }  
-
+// for (auto it = mpMap->Vold_map_id.begin(); it != mpMap->Vold_map_id.end(); ++it) {
+//     std::cout << *it << " ";
+// }
+// std::cout << std::endl;
+// int num=count(mpMap->Vold_map_id.begin(),mpMap->Vold_map_id.end(),pKF->mnId);
+// cout<<"pKF->mnId: "<<pKF->mnId<<" has : "<< num<<endl;
+// if(nRedundantObservations>0.9*nMPs && !num)
+//     pKF->SetBadFlag();
         if(nRedundantObservations>0.9*nMPs)
             pKF->SetBadFlag();
     }

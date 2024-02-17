@@ -399,6 +399,7 @@ void Map::Load ( const string &filename, SystemSetting* mySystemSetting, KeyFram
         KeyFrame* kf = LoadKeyFrame(f, mySystemSetting);
         AddKeyFrame(kf);
         kf_by_order.push_back(kf);
+        Vold_map_id.push_back(kf->mnId);
         mpKeyFrameDatabase->add(kf);
     }
 

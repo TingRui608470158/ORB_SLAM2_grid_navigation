@@ -89,6 +89,7 @@ public:
     void Load( const string &filename, SystemSetting* mySystemSetting, KeyFrameDatabase* mpKeyFrameDatabase);
     MapPoint* LoadMapPoint( ifstream &f );
     KeyFrame* LoadKeyFrame( ifstream &f, SystemSetting* mySystemSetting );
+    vector<int> Vold_map_id;
 
 protected:
 

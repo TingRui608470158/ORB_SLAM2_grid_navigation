@@ -102,7 +102,7 @@ int main(int argc, char **argv){
 		ros::spin();
 	}
 	else{
-		ros::Rate loop_rate(5);
+		ros::Rate loop_rate(30);
 		cv::Mat im;
 		double tframe = 0;
 #ifdef COMPILEDWITHC11
@@ -113,6 +113,7 @@ int main(int argc, char **argv){
 		for (int frame_id = 0; read_from_camera || frame_id < n_images; ++frame_id){
 			if (read_from_camera) {
 				cap_obj.read(im);
+				cv::rotate(im,im,cv::ROTATE_90_COUNTERCLOCKWISE);
 #ifdef COMPILEDWITHC11
 				std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
 #else
@@ -419,7 +420,7 @@ bool parseParams(int argc, char **argv) {
 		if (camera_id >= 0){
 			read_from_camera = true;
 			printf("Reading images from camera with id %d\n", camera_id);
-			cap_obj.open(camera_id);
+			cap_obj.open("/home/aa/Desktop/ORB_SLAM2_grid_navigation/datasets/movie5.mp4");
 			if (!(cap_obj.isOpened())) {
 				printf("Camera stream could not be initialized successfully\n");
 				ros::shutdown();
